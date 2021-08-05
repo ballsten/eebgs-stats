@@ -506,6 +506,11 @@ vite@^2.4.4:
   optionalDependencies:
     fsevents "~2.3.2"
 
+vue-loading-overlay@4.0:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/vue-loading-overlay/-/vue-loading-overlay-4.0.3.tgz#ee6daea512527936b285c722fb239a399afe915c"
+  integrity sha512-pRkA48OJ4VxnswKZiz+TDFCbFiBOl0+M+TCjK0iWZi+xQaOCaOhWDyrWoezlIzHjnZwg6mwOCg+YiuRWZTGrQA==
+
 vue@^3.0.5:
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.1.5.tgz#12879b11d0685ee4478c8869551799630a52f9fe"

@@ -1,14 +1,34 @@
 <template>
   <div class="section">
-    <div class="container">
-      <p class="content">Hello</p>
-    </div>
+    <loading v-model:active="isLoading" loader="bars"></loading>
+    <div class="container"></div>
   </div>
 </template>
 
-<script setup>
-// This starter template is using Vue 3 experimental <script setup> SFCs
-// Check out https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md
+<script>
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
+
+import { Store } from './store'
+
+
+
+export default {
+  data() {
+    return {
+      isLoading: true,
+    };
+  },
+  components: {
+    Loading,
+  },
+  created() {
+    this.store = new Store()
+    this.store.on("dataload", () => {
+      this.isLoading = false
+    })
+  }
+};
 </script>
 
 <style>
