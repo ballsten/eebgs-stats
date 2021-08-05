@@ -11,8 +11,6 @@ import "vue-loading-overlay/dist/vue-loading.css";
 
 import { Store } from './store'
 
-
-
 export default {
   data() {
     return {

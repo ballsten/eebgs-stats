@@ -8,6 +8,10 @@ import axios from 'axios'
 
 import Dexie from 'dexie'
 
+import parser from 'fast-xml-parser'
+
+const BGG_URL = "https://api.geekdo.com/xmlapi2"
+
 export class Store extends Dexie {
 
   constructor() {
@@ -17,7 +21,7 @@ export class Store extends Dexie {
 
     this.version(1).stores({
       players: "uuid, id",
-      games: "uuid, id",
+      games: "uuid, id, bggId, *categories, *mechanics",
       locations: "uuid, id",
       plays: "uuid, locationRefId, gameRefId, bggId",
       playerScores: "++id, playUUID, playerRefId"
@@ -40,20 +44,46 @@ export class Store extends Dexie {
     // fetch the data
     let data = (await axios.get('data/BGStatsExport.json')).data
 
-    for(let player of data.players) {
+    for (let player of data.players) {
       this.players.put(player)
     }
 
-    for(let game of data.games) {
-      this.games.put(game)
+    /*
+     Check what games are new and then bulk request them from bgg.
+     Process the bgg results and incorporate mechanics, categories and description
+     */
+
+    let newGames = []
+
+    for (let game of data.games) {
+      if (!(await this.games.get(game.uuid))) {
+        newGames.push(game)
+      }
     }
-    
-    for(let location of data.locations) {
+
+    const newGameIds = newGames.map(x => x.bggId).join(',')
+    const gameXML = (await axios.get(BGG_URL + "/thing?id=" + newGameIds)).data
+    const bggGames = parser.parse(gameXML, { ignoreAttributes: false }).items.item
+
+    for (let game of newGames) {
+      const bggGame = bggGames.find(x => x['@_id'] == game.bggId)
+      game.categories = []
+      game.mechanics = []
+      for (let link of bggGame.link) {
+        if (link['@_type'] == "boardgamecategory") game.categories.push(link['@_value'])
+        if (link['@_type'] == "boardgamemechanic") game.mechanics.push(link['@_value'])
+      }
+      game.description = bggGame.description
+
+      this.games.add(game)
+    }
+
+    for (let location of data.locations) {
       this.locations.put(location)
     }
 
-    for(let play of data.plays) {
-      for(let playerScore of play.playerScores) {
+    for (let play of data.plays) {
+      for (let playerScore of play.playerScores) {
         playerScore.playUUID = play.uuid
         this.playerScores.put(playerScore)
       }
