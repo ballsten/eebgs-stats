@@ -16,10 +16,11 @@ export class Store extends Dexie {
     this.on.addEventType("dataload")
 
     this.version(1).stores({
-      players: "uuid, id, name, isAnonymous, modificationDate, bggUsername",
-      games: "uuid, id, name, modificationDate, cooperative, highestWins, noPoints, usesTeams, urlThumb, urlImage, bggName, bggYear, bggId, designers, *metaData, isBaseGame, isExpansion, rating, minPlayerCount, maxPlayerCount, minPlayTime, maxPlayTime, minAge, preferredImage, *copies",
-      locations: "uuid, id, name, modificationDate",
-      plays: "uuid, modificationDate, entryDate, playDate, usesTeams, durationMin, ignored, manualWinner, rounds, bggId, locationRefId, gameRefId, rating, nemestatsId, scoringSetting, *playerScores"
+      players: "uuid, id",
+      games: "uuid, id",
+      locations: "uuid, id",
+      plays: "uuid, locationRefId, gameRefId, bggId",
+      playerScores: "++id, playUUID, playerRefId"
     })
 
     this.on('ready', () => {
@@ -27,6 +28,7 @@ export class Store extends Dexie {
       this.games = this.table('games')
       this.locations = this.table('locations')
       this.plays = this.table('plays')
+      this.playerScores = this.table('playerScores')
 
       this.loadData()
     })
@@ -51,7 +53,15 @@ export class Store extends Dexie {
     }
 
     for(let play of data.plays) {
+      for(let playerScore of play.playerScores) {
+        playerScore.playUUID = play.uuid
+        this.playerScores.put(playerScore)
+      }
+
+      delete play.playerScores
       this.plays.put(play)
     }
+
+    this.on.dataload.fire()
   }
 }
