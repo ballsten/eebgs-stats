@@ -36,8 +36,6 @@ export class Store extends Dexie {
 
       this.loadData()
     })
-
-    this.open()
   }
 
   /*

@@ -1,6 +1,6 @@
 <template>
   <h1 class="title">EEBGS Leaderboard</h1>
-  <table class="table is-striped is-fullwidth">
+  <table class="table is-striped is-fullwidth" ref="leaderboard">
     <thead>
       <tr>
         <th><abbr title="Rank">Rank</abbr></th>
@@ -18,7 +18,7 @@
         :class="{ 'is-ineligible': !player.eligible }"
       >
         <td>{{ player.position }}</td>
-        <td>{{ player.name }}</td>
+        <td><router-link :to="{ name: 'player', params: { id: player.id }}">{{ player.name }}</router-link></td>
         <td>{{ player.plays }}</td>
         <td>{{ (player.winPercent * 100).toFixed(2) }}</td>
         <td>{{ player.wins }}</td>
@@ -45,10 +45,8 @@ export default {
       }
     },
   },
-  created() {
-    this.$store.on("dataload", async () => {
-      this.leaderboard = await this.$store.getLeaderboard()
-    })
+  async created() {
+       this.leaderboard = await this.$store.getLeaderboard()
   }
 }
 </script>
