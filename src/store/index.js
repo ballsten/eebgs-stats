@@ -156,7 +156,50 @@ export class Store extends Dexie {
     return leaderboard
   }
 
+  // get player details
+
   async getPlayer(id) {
     return await this.players.get(id)
+  }
+
+  async getPlayerStats(id) {
+    let scores = await this.playerScores.where('playerRefId').equals(id).toArray()
+    return {
+      plays: scores.length,
+      wins: scores.filter((x) => x.winner).length,
+      losses: scores.filter((x) => !x.winner).length
+    }
+  }
+
+  async getPlayerCategoryStats(id) {
+    let results = {}
+
+    await this.transaction('r', ['playerScores', 'plays', 'games'], async () => {
+      let scores = await this.playerScores.where('playerRefId').equals(id).toArray()
+
+      let plays = await this.plays.bulkGet(scores.map(x => x.playUUID))
+
+      let games = await this.games.bulkGet(plays.map(x => x.gameRefId))
+
+      let categories = new Set(games.map(x => x.categories).flat())
+
+      
+      categories.forEach( x => results[x] = { plays: 0, wins: 0, losses: 0 })
+
+      for(let score of scores) {
+        let play = await this.plays.get(score.playUUID)
+        let game = await this.games.get(play.gameRefId)
+        game.categories.forEach(x => {
+          results[x].plays += 1
+          if(score.winner) {
+            results[x].wins += 1
+          } else {
+            results[x].losses += 1
+          }
+        })
+      }
+    }) 
+
+    return results
   }
 }

@@ -20,7 +20,7 @@
         <td>{{ player.position }}</td>
         <td><router-link :to="{ name: 'player', params: { id: player.id }}">{{ player.name }}</router-link></td>
         <td>{{ player.plays }}</td>
-        <td>{{ (player.winPercent * 100).toFixed(2) }}</td>
+        <td>{{ (player.winPercent * 100).toFixed(2) }} %</td>
         <td>{{ player.wins }}</td>
         <td>{{ player.losses }}</td>
       </tr>
