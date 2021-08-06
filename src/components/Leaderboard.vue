@@ -22,7 +22,7 @@
       </tr>
     </tbody>
   </table>
-  <p>*Players with less than 20 players are not included in the rankings</p>
+  <p><i>*Players with less than 20 players are not included in the rankings</i></p>
 </template>
 
 <script>
