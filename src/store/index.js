@@ -20,9 +20,9 @@ export class Store extends Dexie {
     this.on.addEventType("dataload")
 
     this.version(1).stores({
-      players: "uuid, id",
-      games: "uuid, id, bggId, *categories, *mechanics",
-      locations: "uuid, id",
+      players: "id",
+      games: "id, bggId, *categories, *mechanics",
+      locations: "id",
       plays: "uuid, locationRefId, gameRefId, bggId",
       playerScores: "comboUUID, playUUID, playerRefId"
     })
@@ -47,11 +47,14 @@ export class Store extends Dexie {
 
   async loadData() {
     // fetch the data
-    let data = (await axios.get('data/BGStatsExport.json')).data
+    let data = (await axios.get('/data/BGStatsExport.json')).data
 
-    for (let player of data.players) {
-      this.players.put(player)
-    }
+    await this.transaction('rw', 'players', async () => {
+
+      for (let player of data.players) {
+        this.players.put(player)
+      }
+    })
 
     /*
      Check what games are new and then bulk request them from bgg.
@@ -60,43 +63,52 @@ export class Store extends Dexie {
 
     let newGames = []
 
-    for (let game of data.games) {
-      if (!(await this.games.get(game.uuid))) {
-        newGames.push(game)
+    await this.transaction('r', 'games', async () => {
+      for (let game of data.games) {
+        if (!(await this.games.get(game.uuid))) {
+          newGames.push(game)
+        }
       }
-    }
+    })
 
     const newGameIds = newGames.map(x => x.bggId).join(',')
     const gameXML = (await axios.get(BGG_URL + "/thing?id=" + newGameIds)).data
     const bggGames = parser.parse(gameXML, { ignoreAttributes: false }).items.item
 
-    for (let game of newGames) {
-      const bggGame = bggGames.find(x => x['@_id'] == game.bggId)
-      game.categories = []
-      game.mechanics = []
-      for (let link of bggGame.link) {
-        if (link['@_type'] == "boardgamecategory") game.categories.push(link['@_value'])
-        if (link['@_type'] == "boardgamemechanic") game.mechanics.push(link['@_value'])
+
+    await this.transaction('rw', 'games', async () => {
+      for (let game of newGames) {
+        const bggGame = bggGames.find(x => x['@_id'] == game.bggId)
+        game.categories = []
+        game.mechanics = []
+        for (let link of bggGame.link) {
+          if (link['@_type'] == "boardgamecategory") game.categories.push(link['@_value'])
+          if (link['@_type'] == "boardgamemechanic") game.mechanics.push(link['@_value'])
+        }
+        game.description = bggGame.description
+
+        this.games.put(game)
       }
-      game.description = bggGame.description
+    })
 
-      this.games.add(game)
-    }
-
-    for (let location of data.locations) {
-      this.locations.put(location)
-    }
-
-    for (let play of data.plays) {
-      for (let playerScore of play.playerScores) {
-        playerScore.playUUID = play.uuid
-        playerScore.comboUUID = playerScore.playUUID + "-" + playerScore.playerRefId
-        this.playerScores.put(playerScore, "comboUUID")
+    await this.transaction('rw', 'locations', async () => {
+      for (let location of data.locations) {
+        this.locations.put(location)
       }
+    })
 
-      delete play.playerScores
-      this.plays.put(play)
-    }
+    await this.transaction('rw', ['plays', 'playerScores'], async () => {
+      for (let play of data.plays) {
+        for (let playerScore of play.playerScores) {
+          playerScore.playUUID = play.uuid
+          playerScore.comboUUID = playerScore.playUUID + "-" + playerScore.playerRefId
+          this.playerScores.put(playerScore, "comboUUID")
+        }
+
+        delete play.playerScores
+        this.plays.put(play)
+      }
+    })
 
     this.on.dataload.fire()
   }
@@ -142,5 +154,9 @@ export class Store extends Dexie {
     })
 
     return leaderboard
+  }
+
+  async getPlayer(id) {
+    return await this.players.get(id)
   }
 }
