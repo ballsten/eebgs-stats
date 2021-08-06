@@ -40,6 +40,13 @@ export class Store extends Dexie {
     this.open()
   }
 
+  /*
+    Vue Plugin install
+  */
+  install(app, options) {
+    app.config.globalProperties.$store = this
+  }
+
   async loadData() {
     // fetch the data
     let data = (await axios.get('data/BGStatsExport.json')).data

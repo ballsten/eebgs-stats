@@ -3,16 +3,20 @@
   <table class="table is-striped is-fullwidth">
     <thead>
       <tr>
-        <th><abbr title="Position">Pos</abbr></th>
+        <th><abbr title="Rank">Rank</abbr></th>
         <th>Player</th>
-        <th><abbr title="Played">#</abbr></th>
+        <th><abbr title="Played">Played</abbr></th>
         <th><abbr title="Win Percentage">Win %</abbr></th>
         <th>Won</th>
         <th>Lost</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="player in leaderboard" :key="player.id" :class="{'is-ineligible': !player.eligible}">
+      <tr
+        v-for="player in leaderboard"
+        :key="player.id"
+        :class="{ 'is-ineligible': !player.eligible }"
+      >
         <td>{{ player.position }}</td>
         <td>{{ player.name }}</td>
         <td>{{ player.plays }}</td>
@@ -22,20 +26,29 @@
       </tr>
     </tbody>
   </table>
-  <p><i>*Players with less than 20 players are not included in the rankings</i></p>
+  <p>
+    <i>*Players with less than 20 players are not included in the rankings</i>
+  </p>
 </template>
 
 <script>
 export default {
-  props: {
-    leaderboard: Array,
+  data() {
+    return {
+      leaderboard: [],
+    };
   },
   computed: {
-    playerStyle: function(player) {
+    playerStyle: function (player) {
       return {
-        'is-ineligible': player.plays >= 20
+        "is-ineligible": player.plays >= 20,
       }
-    }
+    },
+  },
+  created() {
+    this.$store.on("dataload", async () => {
+      this.leaderboard = await this.$store.getLeaderboard()
+    })
   }
 }
 </script>
