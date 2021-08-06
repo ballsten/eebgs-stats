@@ -24,7 +24,7 @@ export class Store extends Dexie {
       games: "uuid, id, bggId, *categories, *mechanics",
       locations: "uuid, id",
       plays: "uuid, locationRefId, gameRefId, bggId",
-      playerScores: "++id, playUUID, playerRefId"
+      playerScores: "comboUUID, playUUID, playerRefId"
     })
 
     this.on('ready', () => {
@@ -85,7 +85,8 @@ export class Store extends Dexie {
     for (let play of data.plays) {
       for (let playerScore of play.playerScores) {
         playerScore.playUUID = play.uuid
-        this.playerScores.put(playerScore)
+        playerScore.comboUUID = playerScore.playUUID + "-" + playerScore.playerRefId
+        this.playerScores.put(playerScore, "comboUUID")
       }
 
       delete play.playerScores
@@ -93,5 +94,44 @@ export class Store extends Dexie {
     }
 
     this.on.dataload.fire()
+  }
+
+  async getLeaderboard() {
+    let leaderboard = []
+
+    // loop through each player and collate their stats
+
+    await this.transaction("r", [this.players, this.playerScores], async () => {
+      await this.players.each(async (player) => {
+        let playerStats = {
+          id: player.id,
+          name: player.name,
+          position: 0,
+          plays: 0,
+          wins: 0,
+          losses: 0,
+          winPercent: 0,
+          eligible: false
+        }
+        await this.playerScores.where('playerRefId').equals(player.id).each((ps) => {
+          playerStats.plays++
+          if (ps.winner) {
+            playerStats.wins++
+          } else {
+            playerStats.losses++
+          }
+        })
+        playerStats.winPercent = playerStats.wins / playerStats.plays
+        playerStats.eligible = playerStats.plays >= 20 ? true : false
+        leaderboard.push(playerStats)
+      })
+    })
+
+    // sort results and calculate position
+    leaderboard.sort((a, b) => (b.winPercent * (b.eligible ? 1 : 0))  > (a.winPercent * (a.eligible ? 1 : 0)))
+    let position = 1
+    leaderboard.forEach( (p) => p.position = position++)
+
+    return leaderboard
   }
 }
