@@ -62,7 +62,7 @@
         ></result-table>
       </div>
       <div class="column">Second column</div>
-      <div class="column">Third column</div>
+      <div class="column"></div>
     </div>
   </div>
 </template>

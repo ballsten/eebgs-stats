@@ -2,8 +2,15 @@
   <table class="table is-striped is-fullwidth">
     <thead>
       <tr>
-        <th v-for="header in headers" :key="header.field">
+        <th
+          v-for="(header, index) in headers"
+          :key="header.field"
+          @click="sort(index)"
+        >
           {{ header.label }}
+          <span v-show="index == this.internalSortColumn -1" class="icon">
+            <i :class="sortClass"></i>
+          </span>
         </th>
       </tr>
     </thead>
@@ -75,12 +82,19 @@ export default {
         displayTable = this.items.sort((a, b) => b[sortField] > a[sortField])
       }
 
-      if(!this.limitToggle && this.limit) {
+      if (!this.limitToggle && this.limit) {
         displayTable = displayTable.slice(0, this.limit)
       }
 
       return displayTable
     },
+    sortClass() {
+      if(this.internalSortOrder === "ASC") {
+        return "fas fa-sort-up"
+      } else {
+        return "fas fa-sort-down"
+      }
+    }
   },
   methods: {
     format(header, item) {
@@ -93,6 +107,19 @@ export default {
         }
       }
       return value
+    },
+    sort(index) {
+      // if already sorting on the column, change the order
+      if (this.internalSortColumn == index + 1) {
+        if (this.internalSortOrder === 'ASC') {
+          this.internalSortOrder = 'DESC'
+        } else {
+          this.internalSortOrder = 'ASC'
+        }
+      } else {
+        // change the sort column
+        this.internalSortColumn = index + 1
+      }
     },
   },
 }
