@@ -171,8 +171,8 @@ export class Store extends Dexie {
     }
   }
 
-  // returns an array of [Category, plays, wins, losses]
-  async getPlayerCategoryStats(id) {
+  // returns an array of ['field', plays, wins, losses]
+  async getPlayerBGGStats(id, field) {
     let results = {}
 
     await this.transaction('r', ['playerScores', 'plays', 'games'], async () => {
@@ -182,14 +182,14 @@ export class Store extends Dexie {
 
       let games = await this.games.bulkGet(plays.map(x => x.gameRefId))
 
-      let categories = new Set(games.map(x => x.categories).flat())
+      let fields = new Set(games.map(x => x[field]).flat())
 
-      categories.forEach(x => results[x] = { plays: 0, wins: 0, losses: 0 })
+      fields.forEach(x => results[x] = { plays: 0, wins: 0, losses: 0 })
 
       for (let score of scores) {
         let play = await this.plays.get(score.playUUID)
         let game = await this.games.get(play.gameRefId)
-        game.categories.forEach(x => {
+        game[field].forEach(x => {
           results[x].plays += 1
           if (score.winner) {
             results[x].wins += 1
@@ -201,7 +201,7 @@ export class Store extends Dexie {
     })
 
     return Object.entries(results).map(x => {
-      x[1].category = x[0]
+      x[1][field] = x[0]
       x[1].winPercent = x[1].wins / x[1].plays * 100
       return x[1]
     })

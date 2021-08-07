@@ -34,7 +34,7 @@
           :headers="[
             {
               label: 'Category',
-              field: 'category',
+              field: 'categories',
             },
             {
               label: 'Played',
@@ -44,7 +44,7 @@
               label: 'Win %',
               field: 'winPercent',
               type: Number,
-              fixed: 2
+              fixed: 2,
             },
             {
               label: 'Won',
@@ -61,8 +61,39 @@
           sortOrder="DESC"
         ></result-table>
       </div>
-      <div class="column">Second column</div>
-      <div class="column"></div>
+      <div class="column">
+        <h6 class="title is-6">by BGG Mechanic</h6>
+        <result-table
+          :headers="[
+            {
+              label: 'Mechanic',
+              field: 'mechanics',
+            },
+            {
+              label: 'Played',
+              field: 'plays',
+            },
+            {
+              label: 'Win %',
+              field: 'winPercent',
+              type: Number,
+              fixed: 2,
+            },
+            {
+              label: 'Won',
+              field: 'wins',
+            },
+            {
+              label: 'Lost',
+              field: 'losses',
+            },
+          ]"
+          :limit="5"
+          :items="playerMechanicStats"
+          :sortColumn="2"
+          sortOrder="DESC"
+        ></result-table>
+      </div>
     </div>
   </div>
 </template>
@@ -79,6 +110,7 @@ export default {
       player: {},
       playerStats: {},
       playerCategoryStats: [],
+      playerMechanicStats: [],
     }
   },
   async created() {
@@ -87,9 +119,8 @@ export default {
     let loader = this.$loading.show({ loader: 'bars' })
     this.player = await this.$store.getPlayer(playerId)
     this.playerStats = await this.$store.getPlayerStats(playerId)
-    this.playerCategoryStats = await this.$store.getPlayerCategoryStats(
-      playerId
-    )
+    this.playerCategoryStats = await this.$store.getPlayerBGGStats(playerId, 'categories')
+    this.playerMechanicStats = await this.$store.getPlayerBGGStats(playerId, 'mechanics')
     loader.hide()
   },
 }
