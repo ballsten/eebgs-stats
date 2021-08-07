@@ -55,8 +55,8 @@
               field: 'losses',
             },
           ]"
-          :items="playerCategoryStats"
           :limit="5"
+          :items="playerCategoryStats"
           :sortColumn="2"
           sortOrder="DESC"
         ></result-table>

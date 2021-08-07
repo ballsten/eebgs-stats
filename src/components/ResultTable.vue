@@ -14,14 +14,32 @@
         </td>
       </tr>
     </tbody>
+    <tfoot v-if="limit">
+      <tr>
+        <td :colspan="this.headers.length">
+          <button
+            class="button is-fullwidth"
+            @click="limitToggle = !limitToggle"
+          >
+            {{ limitToggle ? 'Less' : 'More' }}
+          </button>
+        </td>
+      </tr>
+    </tfoot>
   </table>
 </template>
 
 <script>
 export default {
   props: {
-    headers: Array,
-    items: Array,
+    headers: {
+      type: Array,
+      required: true,
+    },
+    items: {
+      type: Array,
+      required: true,
+    },
     limit: Number,
     sortColumn: {
       type: Number,
@@ -38,19 +56,30 @@ export default {
       },
     },
   },
+  data() {
+    return {
+      internalSortColumn: this.sortColumn,
+      internalSortOrder: this.sortOrder,
+      limitToggle: false,
+    }
+  },
   computed: {
     displayItems() {
-      let sortField = this.headers[this.sortColumn - 1].field
+      let sortField = this.headers[this.internalSortColumn - 1].field
 
-      if ((this.sortOrder == 'ASC')) {
-        return this.items
-          .sort((a, b) => b[sortField] < a[sortField])
-          .slice(0, this.limit)
+      let displayTable
+
+      if (this.internalSortOrder == 'ASC') {
+        displayTable = this.items.sort((a, b) => b[sortField] < a[sortField])
       } else {
-        return this.items
-          .sort((a, b) => b[sortField] > a[sortField])
-          .slice(0, this.limit)
+        displayTable = this.items.sort((a, b) => b[sortField] > a[sortField])
       }
+
+      if(!this.limitToggle && this.limit) {
+        displayTable = displayTable.slice(0, this.limit)
+      }
+
+      return displayTable
     },
   },
   methods: {
