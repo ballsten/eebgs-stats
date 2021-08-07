@@ -19,7 +19,7 @@ export class Store extends Dexie {
 
     this.on.addEventType("dataload")
 
-    this.version(1).stores({
+    this.version(2).stores({
       players: "id",
       games: "id, bggId, *categories, *mechanics",
       locations: "id",
