@@ -14,6 +14,8 @@ const BGG_URL = "https://api.geekdo.com/xmlapi2"
 
 export class Store extends Dexie {
 
+  ready = false
+
   constructor() {
     super('eebgs')
 
@@ -36,6 +38,10 @@ export class Store extends Dexie {
 
       this.loadData()
     })
+
+    this.delete().then(() => {
+      this.open()
+    })
   }
 
   /*
@@ -44,6 +50,12 @@ export class Store extends Dexie {
   install(app, options) {
     app.config.globalProperties.$store = this
   }
+
+  // state check
+  isReady() {
+    return this.ready
+  }
+
 
   async loadData() {
     // fetch the data
@@ -111,6 +123,7 @@ export class Store extends Dexie {
     })
 
     this.on.dataload.fire()
+    this.ready = true
   }
 
   async getLeaderboard() {

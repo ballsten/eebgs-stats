@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import Loading from '../components/Loading.vue'
 import Leaderboard from '../components/Leaderboard.vue'
 import Player from '../components/Player.vue'
 
 const routes = [
-  { path: '/', component: Leaderboard },
+  { path: '/', component: Loading },
+  { path: '/leaderboard', component: Leaderboard },
   { path: '/player/:id', name: "player", component: Player }
 ]
 

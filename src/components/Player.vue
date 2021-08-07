@@ -116,12 +116,10 @@ export default {
   async created() {
     let playerId = Number.parseInt(this.$route.params.id)
 
-    let loader = this.$loading.show({ loader: 'bars' })
     this.player = await this.$store.getPlayer(playerId)
     this.playerStats = await this.$store.getPlayerStats(playerId)
     this.playerCategoryStats = await this.$store.getPlayerBGGStats(playerId, 'categories')
     this.playerMechanicStats = await this.$store.getPlayerBGGStats(playerId, 'mechanics')
-    loader.hide()
   },
 }
 </script>

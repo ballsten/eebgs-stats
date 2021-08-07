@@ -11,7 +11,6 @@
     "dexie": "^3.0.3",
     "fast-xml-parser": "^3.19.0",
     "vue": "^3.0.5",
-    "vue-loading-overlay": "4.0",
     "vue-router": "4"
   },
   "devDependencies": {
