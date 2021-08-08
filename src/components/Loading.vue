@@ -9,10 +9,10 @@
 export default {
   created() {
     if (this.$store.isReady()) {
-      this.$router.push('/leaderboard')
+      this.$router.replace(this.$route.query.redirectTo || '/leaderboard')
     } else {
       this.$store.on('dataload', () => {
-        this.$router.push('/leaderboard')
+        this.$router.replace(this.$route.query.redirectTo || '/leaderboard')
       })
     }
   },

@@ -5,7 +5,7 @@ import Leaderboard from '../components/Leaderboard.vue'
 import Player from '../components/Player.vue'
 
 const routes = [
-  { path: '/', component: Loading },
+  { path: '/', component: Loading, props: true },
   { path: '/leaderboard', component: Leaderboard },
   { path: '/player/:id', name: "player", component: Player }
 ]
