@@ -5,10 +5,12 @@
       {
         label: 'Rank',
         field: 'rank',
+        sortField: 'position'
       },
       {
         label: 'Player',
         field: 'name',
+        routeTo: { name: 'player', params: { id: 'id' } }
       },
       {
         label: 'Played',
@@ -32,7 +34,8 @@
     :items="leaderboard"
     :sortColumn="1"
     sortOrder="ASC"
-  ></result-table>
+  >
+  </result-table>
 
   <p>
     <i>*Players with less than 20 players are not included in the rankings</i>

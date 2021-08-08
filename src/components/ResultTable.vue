@@ -8,7 +8,7 @@
           @click="sort(index)"
         >
           {{ header.label }}
-          <span v-show="index == this.internalSortColumn -1" class="icon">
+          <span v-show="index == this.internalSortColumn - 1" class="icon">
             <i :class="sortClass"></i>
           </span>
         </th>
@@ -17,7 +17,14 @@
     <tbody>
       <tr v-for="(item, index) in displayItems" :key="index">
         <td v-for="header in headers" :key="header.field">
-          {{ format(header, item) }}
+          <template v-if="header.routeTo">
+            <router-link :to="routeTo(header, item)">
+              {{ format(header, item) }}
+            </router-link>
+          </template>
+          <template v-else>
+            {{ format(header, item) }}
+          </template>
         </td>
       </tr>
     </tbody>
@@ -72,7 +79,7 @@ export default {
   },
   computed: {
     displayItems() {
-      let sortField = this.headers[this.internalSortColumn - 1].field
+      let sortField = this.headers[this.internalSortColumn - 1].sortField || this.headers[this.internalSortColumn - 1].field
 
       let displayTable
 
@@ -89,12 +96,12 @@ export default {
       return displayTable
     },
     sortClass() {
-      if(this.internalSortOrder === "ASC") {
-        return "fas fa-sort-up"
+      if (this.internalSortOrder === 'ASC') {
+        return 'fas fa-sort-up'
       } else {
-        return "fas fa-sort-down"
+        return 'fas fa-sort-down'
       }
-    }
+    },
   },
   methods: {
     format(header, item) {
@@ -121,6 +128,13 @@ export default {
         this.internalSortColumn = index + 1
       }
     },
+    routeTo(header, item) {
+      return {
+        name: header.routeTo.name,
+        // calculate params
+        params: Object.fromEntries(Object.entries(header.routeTo.params).map(x => x[1] = [x[0],item[x[0]]]))
+      }
+    }
   },
 }
 </script>

@@ -136,6 +136,7 @@ export class Store extends Dexie {
         let playerStats = {
           id: player.id,
           name: player.name,
+          position: 0,
           rank: "-",
           plays: 0,
           wins: 0,
@@ -160,10 +161,12 @@ export class Store extends Dexie {
     // sort results and calculate rankings
     leaderboard.sort((a, b) => (b.winPercent * (b.eligible ? 1 : 0)) > (a.winPercent * (a.eligible ? 1 : 0)))
     let rank = 1
+    let position = 1
     leaderboard.forEach((p) => {
       if (p.eligible) {
         p.rank = rank++
       }
+      p.position = position++
     })
 
     return leaderboard
