@@ -136,7 +136,7 @@ export class Store extends Dexie {
         let playerStats = {
           id: player.id,
           name: player.name,
-          position: "",
+          rank: "-",
           plays: 0,
           wins: 0,
           losses: 0,
@@ -151,18 +151,18 @@ export class Store extends Dexie {
             playerStats.losses++
           }
         })
-        playerStats.winPercent = playerStats.wins / playerStats.plays
+        playerStats.winPercent = playerStats.wins / playerStats.plays * 100
         playerStats.eligible = playerStats.plays >= 20 ? true : false
         leaderboard.push(playerStats)
       })
     })
 
-    // sort results and calculate position
+    // sort results and calculate rankings
     leaderboard.sort((a, b) => (b.winPercent * (b.eligible ? 1 : 0)) > (a.winPercent * (a.eligible ? 1 : 0)))
-    let position = 1
+    let rank = 1
     leaderboard.forEach((p) => {
       if (p.eligible) {
-        p.position = position++
+        p.rank = rank++
       }
     })
 
