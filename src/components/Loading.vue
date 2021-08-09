@@ -1,8 +1,13 @@
 <template>
-  <h1>we are loading</h1>
-  <span class="icon is-medium">
-    <i class="fas fa-sync fa-spin"></i>
-  </span>
+  <div class="container">
+    <div class="columns is-centered is-vcentered spinner">
+      <div class="column is-narrow has-text-centered">
+        <span class="icon is-large">
+          <i class="fas fa-spinner fa-spin fa-10x"></i>
+        </span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -18,3 +23,9 @@ export default {
   },
 }
 </script>
+
+<style lang="css" scoped>
+div.spinner {
+  margin-top: 400px;
+}
+</style>
